@@ -15,7 +15,9 @@ echo 'PS1="PlatformSDK $PS1"' > ~/.mersdk.profile ;
 echo '[ -d /etc/bash_completion.d ] && for i in /etc/bash_completion.d/*;do . $i;done'  >> ~/.mersdk.profile ;
 
 2. Заходим в среду кросскомпиляции:
+```bash
 sfossdk
+```
 
 3. Устанавливаем утилиты внутри среды кросскомпиляции:
 ```bash
@@ -33,9 +35,6 @@ mkdir webrtc && cd webrtc
 GYP_DEFINES="target_arch=arm" fetch --no-history webrtc
 pushd src
 gn gen out/Release --args='is_debug=false rtc_use_h264=true ffmpeg_branding="Chrome" rtc_include_tests=false rtc_enable_protobuf=false is_clang=false target_cpu="arm" treat_warnings_as_errors=false rtc_use_x11=false is_clang=false use_gold=false'
-
-gn gen out/Release --args='is_debug=false rtc_use_h264=true ffmpeg_branding="Chrome" rtc_include_tests=false rtc_enable_protobuf=false is_clang=false target_cpu="arm" treat_warnings_as_errors=false rtc_use_x11=false is_clang=false linux_use_bundled_binutils=false use_debug_fission=false use_gold=false use_cxx11=true use_custom_libcxx=false use_custom_libcxx_for_host=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true'
-
 pushd out/Release
 find -type f -name '*.ninja' -exec sed -i 's/arm-linux-gnueabihf-//g' {} \;
 find -type f -name '*.ninja' -exec sed -i 's/\/arm-linux-gnueabihf//g' {} \;
