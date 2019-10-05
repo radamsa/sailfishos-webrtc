@@ -23,7 +23,7 @@ sfossdk
 
 3. Устанавливаем утилиты внутри среды кросскомпиляции:
 ```bash
-sb2 -m sdk-install -R zypper in git alsa-lib alsa-lib-devel pulseaudio pulseaudio-devel
+sb2 -m sdk-install -R zypper in git alsa-lib alsa-lib-devel pulseaudio pulseaudio-devel openssl openssl-devel libjpeg-turbo libjpeg-turbo-devel
 ```
 
 # Компилируем WebRTC (начинаем вне среды кросскомпиляции):
@@ -35,17 +35,18 @@ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 export PATH=$PATH:$(pwd)/depot_tools
 mkdir webrtc && cd webrtc
 GYP_DEFINES="target_arch=arm" fetch --no-history webrtc
-pushd src
-gn gen out/Release --args='is_debug=false rtc_use_h264=true ffmpeg_branding="Chrome" rtc_include_tests=false rtc_enable_protobuf=false is_clang=false target_cpu="arm" treat_warnings_as_errors=false rtc_use_x11=false is_clang=false use_gold=false'
-pushd out/Release
-find -type f -name '*.ninja' -exec sed -i 's/arm-linux-gnueabihf-//g' {} \;
-find -type f -name '*.ninja' -exec sed -i 's/\/arm-linux-gnueabihf//g' {} \;
-popd
+
+gn gen out/Release --args='gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" rtc_use_x11=false use_x11=false rtc_build_examples=false'
+
+find out/Release -type f -name '*.ninja' -exec sed -i 's/arm-linux-gnueabihf-//g' {} \;
+find out/Release -type f -name '*.ninja' -exec sed -i 's/\/arm-linux-gnueabihf//g' {} \;
+
 sfossdk
 export PATH=$PATH:/home/dav/projects/depot_tools
 sb2 -m sdk-build ninja -C out/Release
 ```
 
+## аозможные ошибки при компиляции:
 ### error:
 ```
 [220/2868] CXX obj/buildtools/third_party/libc++abi/libc++abi/cxa_personality.o
@@ -130,13 +131,70 @@ inline auto constexpr DivideRoundToNearest(Dividend dividend, Divisor divisor) {
 
 ### error:
 ```
-[1792/2863] ASM obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o
-FAILED: obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o 
-gcc -MMD -MF obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o.d -DUSE_UDEV -DUSE_AURA=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -D_LIBCPP_ABI_UNSTABLE -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_ENABLE_NODISCARD -DCR_LIBCXX_REVISION=361348 -DCR_SYSROOT_HASH=ef5c4f84bcafb7a3796d36bb1db7826317dde51c -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -I../../third_party/boringssl/src/include -I../.. -Igen -fPIC -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -funwind-tables -fPIC -pipe -pthread -std=gnu11 -march=armv7-a -mfloat-abi=hard -mtune=generic-armv7-a -mfpu=neon -g0 --sysroot=../../build/linux/debian_sid_arm-sysroot -c ../../third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S -o obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o
-{standard input}: Assembler messages:
-{standard input}: Error: .size expression for _vpaes_decrypt_consts does not evaluate to a constant
-[1794/2863] CXX obj/third_party/boringssl/boringssl/tls_record.o
+[579/2719] CXX obj/modules/audio_processing/audio_processing/normalized_covariance_estimator.o
+FAILED: obj/modules/audio_processing/audio_processing/normalized_covariance_estimator.o 
+g++ -MMD -MF obj/modules/audio_processing/audio_processing/normalized_covariance_estimator.o.d -DWEBRTC_NS_FIXED -DUSE_UDEV -DUSE_AURA=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -DWEBRTC_ENABLE_PROTOBUF=0 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DRTC_ENABLE_VP9 -DHAVE_SCTP -DWEBRTC_USE_H264 -DWEBRTC_ARCH_ARM -DWEBRTC_ARCH_ARM_V7 -DWEBRTC_HAS_NEON -DWEBRTC_APM_DEBUG_DUMP=0 -DWEBRTC_LIBRARY_IMPL -DWEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=0 -DWEBRTC_POSIX -DWEBRTC_LINUX -DABSL_ALLOCATOR_NOTHROW=1 -I../.. -Igen -I../../third_party/abseil-cpp -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -funwind-tables -fPIC -pipe -pthread -march=armv7-a -mfloat-abi=hard -mtune=generic-armv7-a -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -mfpu=neon -mthumb -Wall -Wno-psabi -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-comments -Wno-packed-not-aligned -Wno-missing-field-initializers -Wno-unused-parameter -O2 -fno-ident -fdata-sections -ffunction-sections -fno-omit-frame-pointer -gdwarf-3 -g2 -fvisibility=hidden -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=gnu++14 -Wno-narrowing -Wno-class-memaccess -fno-exceptions -fno-rtti -fvisibility-inlines-hidden -Wnon-virtual-dtor -Woverloaded-virtual -c ../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc -o obj/modules/audio_processing/audio_processing/normalized_covariance_estimator.o
+In file included from ../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc:15:0:
+../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc: In member function ‘void webrtc::NormalizedCovarianceEstimator::Update(float, float, float, float, float, float)’:
+../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc:34:34: error: ‘isfinite’ was not declared in this scope
+   RTC_DCHECK(isfinite(covariance_));
+                                  ^
+../../rtc_base/checks.h:311:26: note: in definition of macro ‘RTC_EAT_STREAM_PARAMETERS’
+   (true ? true : ((void)(ignored), true))                         \
+                          ^
+../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc:34:3: note: in expansion of macro ‘RTC_DCHECK’
+   RTC_DCHECK(isfinite(covariance_));
+   ^
+../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc:34:34: note: suggested alternative:
+   RTC_DCHECK(isfinite(covariance_));
+                                  ^
+../../rtc_base/checks.h:311:26: note: in definition of macro ‘RTC_EAT_STREAM_PARAMETERS’
+   (true ? true : ((void)(ignored), true))                         \
+                          ^
+../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc:34:3: note: in expansion of macro ‘RTC_DCHECK’
+   RTC_DCHECK(isfinite(covariance_));
+   ^
+In file included from /srv/mer/toolings/SailfishOS-latest/opt/cross/armv7hl-meego-linux-gnueabi/include/c++/4.9.4/random:38:0,
+                 from /srv/mer/toolings/SailfishOS-latest/opt/cross/armv7hl-meego-linux-gnueabi/include/c++/4.9.4/bits/stl_algo.h:66,
+                 from /srv/mer/toolings/SailfishOS-latest/opt/cross/armv7hl-meego-linux-gnueabi/include/c++/4.9.4/algorithm:62,
+                 from ../../third_party/abseil-cpp/absl/strings/string_view.h:30,
+                 from ../../rtc_base/checks.h:46,
+                 from ../../modules/audio_processing/echo_detector/normalized_covariance_estimator.cc:15:
+/srv/mer/toolings/SailfishOS-latest/opt/cross/armv7hl-meego-linux-gnueabi/include/c++/4.9.4/cmath:601:5: note:   ‘std::isfinite’
+     isfinite(_Tp __x)
+     ^
+At global scope:
+cc1plus: warning: unrecognized command line option "-Wno-class-memaccess"
+cc1plus: warning: unrecognized command line option "-Wno-packed-not-aligned"
+[581/2719] CXX obj/modules/audio_processing/audio_processing/gain_control_for_experimental_agc.o
 ninja: build stopped: subcommand failed.
 ```
 #### fix:
-???
+Нужно скорректировать вызов RTC_DCHECK(isfinite... дбавив имя пространства имен std::
+Получится  RTC_DCHECK(std::isfinite...
+
+### error:
+```
+[1136/2719] CXX obj/test/perf_test/perf_test.o
+../../test/testsupport/perf_test.cc: In member function ‘std::string {anonymous}::PerfResultsLogger::UnitWithDirection(const string&, webrtc::test::ImproveDirection)’:
+../../test/testsupport/perf_test.cc:214:3: warning: control reaches end of non-void function [-Wreturn-type]
+   }
+   ^
+At global scope:
+cc1plus: warning: unrecognized command line option "-Wno-class-memaccess"
+cc1plus: warning: unrecognized command line option "-Wno-packed-not-aligned"
+[1692/2719] ASM obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o
+FAILED: obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o 
+gcc -MMD -MF obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o.d -DUSE_UDEV -DUSE_AURA=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -I../../third_party/boringssl/src/include -I../.. -Igen -fPIC -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -funwind-tables -fPIC -pipe -pthread -std=gnu11 -march=armv7-a -mfloat-abi=hard -mtune=generic-armv7-a -mfpu=neon -gdwarf-3 -g2 -c ../../third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S -o obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o
+{standard input}: Assembler messages:
+{standard input}: Error: .size expression for _vpaes_decrypt_consts does not evaluate to a constant
+[1694/2719] CXX obj/third_party/boringssl/boringssl/tls_record.o
+ninja: build stopped: subcommand failed.
+```
+#### fix: [https://boringssl-review.googlesource.com/c/boringssl/+/37824/4/crypto/fipsmodule/aes/asm/vpaes-armv7.pl]
+В файле third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S после строк 
+.type	_vpaes_decrypt_consts,%object
+.align	4
+
+добавляем строку
+_vpaes_decrypt_consts:
