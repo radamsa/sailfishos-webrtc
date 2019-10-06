@@ -192,9 +192,12 @@ gcc -MMD -MF obj/third_party/boringssl/boringssl_asm/vpaes-armv7.o.d -DUSE_UDEV 
 ninja: build stopped: subcommand failed.
 ```
 #### fix: [https://boringssl-review.googlesource.com/c/boringssl/+/37824/4/crypto/fipsmodule/aes/asm/vpaes-armv7.pl]
-В файле third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S после строк 
+В файле third_party/boringssl/src/crypto/fipsmodule/vpaes-armv7.pl после строк 
 .type	_vpaes_decrypt_consts,%object
 .align	4
 
 добавляем строку
 _vpaes_decrypt_consts:
+
+Делаем тоже самое в файле third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S
+Это нужно для того, чтобы сразу продолжить компиляцию, не перегенерируя ASM файлы.
