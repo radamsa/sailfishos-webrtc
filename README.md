@@ -35,6 +35,7 @@ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 export PATH=$PATH:$(pwd)/depot_tools
 mkdir webrtc && cd webrtc
 GYP_DEFINES="target_arch=arm" fetch --no-history webrtc
+echo "target_os = ['unix']" >> .gclient
 
 gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" rtc_use_x11=false use_x11=false rtc_build_examples=false'
 
@@ -46,7 +47,10 @@ export PATH=$PATH:/home/dav/projects/depot_tools
 sb2 -m sdk-build ninja -C out/Release
 ```
 
-## аозможные ошибки при компиляции:
+# Собираем SDK
+???
+
+## Возможные ошибки при компиляции:
 ### error:
 ```
 [220/2868] CXX obj/buildtools/third_party/libc++abi/libc++abi/cxa_personality.o
