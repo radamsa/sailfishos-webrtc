@@ -47,9 +47,6 @@ export PATH=$PATH:/home/dav/projects/depot_tools
 sb2 -m sdk-build ninja -C out/Release
 ```
 
-# Собираем SDK
-???
-
 ## Возможные ошибки при компиляции:
 ### error:
 ```
@@ -205,3 +202,24 @@ _vpaes_decrypt_consts:
 
 Делаем тоже самое в файле third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S
 Это нужно для того, чтобы сразу продолжить компиляцию, не перегенерируя ASM файлы.
+
+# Собираем SDK
+```bash
+mkdir -p ../libwebrtc/include
+mkdir -p ../libwebrtc/lib
+```
+
+## Копируем заголовочные файлы
+```bash
+find . -name '*.h' -exec cp --parents {} ../libwebrtc/include \;
+```
+
+## Удаляем каталоги с не нужными заголовочными фалами
+```bash
+rm -Rf ../libwebrtc/include/build ../libwebrtc/include/buildtools ../libwebrtc/include/out ../libwebrtc/include/test ../libwebrtc/include/testing ../libwebrtc/include/tools_webrtc ../libwebrtc/include/examples
+```
+
+## Копируем файлы библиотек
+```bash
+cp out/Release/obj/libwebrtc.a ../libwebrtc/lib
+```
