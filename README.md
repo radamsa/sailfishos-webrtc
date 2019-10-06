@@ -214,7 +214,7 @@ mkdir -p ../libwebrtc/lib
 find . -name '*.h' -exec cp --parents {} ../libwebrtc/include \;
 ```
 
-## Удаляем каталоги с не нужными заголовочными фалами
+### Удаляем каталоги с не нужными заголовочными фалами
 ```bash
 rm -Rf ../libwebrtc/include/build ../libwebrtc/include/buildtools ../libwebrtc/include/out ../libwebrtc/include/test ../libwebrtc/include/testing ../libwebrtc/include/tools_webrtc ../libwebrtc/include/examples
 ```
