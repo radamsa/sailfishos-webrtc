@@ -1,10 +1,7 @@
 !!! ВНИМАНИЕ !!! В процессе подготовки и установки исходников WebRTC потребуется скачать более 15Гб.
 ----------------------------------------------------------------------------------------------------
 
-
-# Подготовка (только версия для armv7hl):
-
-1. Устанавливаем SDK и утилиты для кросскомпиляции:
+# Устанавливаем SDK и утилиты для кросскомпиляции (только версия для armv7hl)
 ```bash
 export PLATFORM_SDK_ROOT=/srv/mer
 curl -k -O http://releases.sailfishos.org/sdk/installers/latest/Jolla-latest-SailfishOS_Platform_SDK_Chroot-i486.tar.bz2 ;
@@ -16,32 +13,45 @@ echo 'PS1="PlatformSDK $PS1"' > ~/.mersdk.profile ;
 echo '[ -d /etc/bash_completion.d ] && for i in /etc/bash_completion.d/*;do . $i;done'  >> ~/.mersdk.profile ;
 ```
 
-2. Заходим в среду кросскомпиляции:
+# Устанавливаем утилиты внутри среды кросскомпиляции
 ```bash
 sfossdk
-```
-
-3. Устанавливаем утилиты внутри среды кросскомпиляции:
-```bash
 sb2 -m sdk-install -R zypper in git alsa-lib alsa-lib-devel pulseaudio pulseaudio-devel openssl openssl-devel libjpeg-turbo libjpeg-turbo-devel
 ```
 
-# Компилируем WebRTC (начинаем вне среды кросскомпиляции):
--- Каждый раз при входе в среду кросскомпиляции потребуется восстанавливать переменную PATH так, чтобы были доступны depot_tools
--- Список переменных, передаваемых внутри строки --args при конфигурации (gn gen...), можно посмотреть в файлах BUILD.gn
+*далее следует выбрать, какая версия WebRTC будет собираться (3.1 или 3.2). после выбора и настройки пеерходим к п. 3.3*
 
+## Настраиваем поледнюю версию WebRTC
 ```bash
-git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-export PATH=$PATH:$(pwd)/depot_tools
-mkdir webrtc && cd webrtc
 GYP_DEFINES="target_arch=arm" fetch --no-history webrtc
 echo "target_os = ['unix']" >> .gclient
+cd src
 
+# строка для конфигурирования последней версии WebRTC
 gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" rtc_use_x11=false use_x11=false rtc_build_examples=false'
+```
 
+## Настраиваем версию WebRTC: branch-heads/59 (требуется для компиляции qwebrtc [https://github.com/tplgy/qwebrtc])
+*на хосте потребуется наличие gtk+-2.0 (sudo apt install gtk+-2.0)*
+```bash
+GYP_DEFINES="target_arch=arm" fetch --nohooks webrtc
+echo "target_os = ['unix']" >> .gclient
+cd src
+git checkout branch-heads/59
+gclient sync --shallow
+
+# строка для конфигурирования версии WebRTC: branch-heads/59
+gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_custom_libcxx=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=false rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm"'
+```
+## Готовимся к компиляции
+*скорректируем имена используемых компиляторов/утилит*
+```bash
 find out/Release -type f -name '*.ninja' -exec sed -i 's/arm-linux-gnueabihf-//g' {} \;
 find out/Release -type f -name '*.ninja' -exec sed -i 's/\/arm-linux-gnueabihf//g' {} \;
+```
 
+## Собственно компиляция
+```bash
 sfossdk
 export PATH=$PATH:/home/dav/projects/depot_tools
 sb2 -m sdk-build ninja -C out/Release
