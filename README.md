@@ -41,7 +41,7 @@ git checkout branch-heads/59
 gclient sync --shallow
 
 # строка для конфигурирования версии WebRTC: branch-heads/59
-gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_custom_libcxx=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=false rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm"'
+gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_custom_libcxx=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_enable_libevent=false rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm"'
 ```
 ## 2.3. Готовимся к компиляции
 *скорректируем имена используемых компиляторов/утилит*
@@ -212,6 +212,38 @@ _vpaes_decrypt_consts:
 
 Делаем тоже самое в файле third_party/boringssl/linux-arm/crypto/fipsmodule/vpaes-armv7.S
 Это нужно для того, чтобы сразу продолжить компиляцию, не перегенерируя ASM файлы.
+
+### error:
+```
+[1245/2232] CXX obj/webrtc/base/rtc_task_queue/sequenced_task_checker_impl.o
+FAILED: obj/webrtc/base/rtc_task_queue/sequenced_task_checker_impl.o 
+g++ -MMD -MF obj/webrtc/base/rtc_task_queue/sequenced_task_checker_impl.o.d -DV8_DEPRECATION_WARNINGS -DUSE_UDEV -DUSE_AURA=1 -DUSE_PANGO=1 -DUSE_CAIRO=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -DFULL_SAFE_BROWSING -DSAFE_BROWSING_CSD -DSAFE_BROWSING_DB_LOCAL -DCHROMIUM_BUILD -DENABLE_MEDIA_ROUTER=1 -DFIELDTRIAL_TESTING_ENABLED -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -DWEBRTC_ENABLE_PROTOBUF=0 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DEXPAT_RELATIVE_PATH -DHAVE_SCTP -DWEBRTC_ARCH_ARM -DWEBRTC_ARCH_ARM_V7 -DWEBRTC_HAS_NEON -DWEBRTC_POSIX -DWEBRTC_LINUX -I../.. -Igen -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -funwind-tables -fPIC -pipe -march=armv7-a -mfloat-abi=hard -mtune=generic-armv7-a -pthread -mfpu=neon -mthumb -Wall -Wno-psabi -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -O2 -fno-ident -fdata-sections -ffunction-sections -fomit-frame-pointer -g2 -fvisibility=hidden -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-strict-overflow -fvisibility-inlines-hidden -std=gnu++11 -Wno-narrowing -fno-rtti -fno-exceptions -Wnon-virtual-dtor -Woverloaded-virtual -c ../../webrtc/base/sequenced_task_checker_impl.cc -o obj/webrtc/base/rtc_task_queue/sequenced_task_checker_impl.o
+In file included from ../../webrtc/base/sequenced_task_checker_impl.cc:19:0:
+../../webrtc/base/task_queue.h:298:2: error: #error not supported.
+ #error not supported.
+  ^
+[1247/2232] CXX obj/webrtc/base/rtc_base_approved/logging.o
+```
+#### fix:
+самый идиотский способ - добавить в начало файла src/webrtc/base/task_queue.h строку:
+#define WEBRTC_BUILD_LIBEVENT
+
+по хорошему нужно найти, как заставить появиться это определение через BUILD.gn
+
+### error:
+```
+[230/908] CXX obj/webrtc/examples/peerconnection_client/main_wnd.o
+FAILED: obj/webrtc/examples/peerconnection_client/main_wnd.o 
+g++ -MMD -MF obj/webrtc/examples/peerconnection_client/main_wnd.o.d -DV8_DEPRECATION_WARNINGS -DUSE_UDEV -DUSE_AURA=1 -DUSE_PANGO=1 -DUSE_CAIRO=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -DFULL_SAFE_BROWSING -DSAFE_BROWSING_CSD -DSAFE_BROWSING_DB_LOCAL -DCHROMIUM_BUILD -DENABLE_MEDIA_ROUTER=1 -DFIELDTRIAL_TESTING_ENABLED -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -DWEBRTC_ENABLE_PROTOBUF=0 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DEXPAT_RELATIVE_PATH -DHAVE_SCTP -DWEBRTC_ARCH_ARM -DWEBRTC_ARCH_ARM_V7 -DWEBRTC_HAS_NEON -DWEBRTC_POSIX -DWEBRTC_LINUX -DHAVE_WEBRTC_VIDEO -DHAVE_WEBRTC_VOICE -I../.. -Igen -I/usr/include/gtk-2.0 -I/usr/lib/x86_64-linux-gnu/gtk-2.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libpng12 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng12 -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/freetype2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../../third_party/libyuv/include -I../../third_party/jsoncpp/overrides/include -I../../third_party/jsoncpp/source/include -Wno-deprecated-declarations -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -funwind-tables -fPIC -pipe -march=armv7-a -mfloat-abi=hard -mtune=generic-armv7-a -pthread -mfpu=neon -mthumb -Wall -Wno-psabi -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -O2 -fno-ident -fdata-sections -ffunction-sections -fomit-frame-pointer -g2 -fvisibility=hidden -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-strict-overflow -fvisibility-inlines-hidden -std=gnu++11 -Wno-narrowing -fno-rtti -fno-exceptions -Wnon-virtual-dtor -Woverloaded-virtual -c ../../webrtc/examples/peerconnection/client/linux/main_wnd.cc -o obj/webrtc/examples/peerconnection_client/main_wnd.o
+../../webrtc/examples/peerconnection/client/linux/main_wnd.cc:13:28: fatal error: gdk/gdkkeysyms.h: No such file or directory
+ #include <gdk/gdkkeysyms.h>
+                            ^
+compilation terminated.
+[232/908] CXX obj/webrtc/examples/peerconnection_client/peer_connection_client.o
+```
+
+#### fix:
+???
 
 # 3. Собираем SDK
 ```bash
