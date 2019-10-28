@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#based on https://github.com/tplgy/qwebrtc/blob/master/build_webrtc.py
 
 import argparse
 import os
