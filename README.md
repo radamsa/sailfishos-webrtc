@@ -38,15 +38,23 @@ sb2 -m sdk-install -R zypper in git alsa-lib-devel pulseaudio-devel openssl-deve
 *далее следует выбрать, какая версия WebRTC будет собираться (2.1 или 2.2). после выбора и настройки пеерходим к п. 2.3*
 
 # 3. Настраиваем поледнюю версию WebRTC
+ВАЖНО: нужно проверить, есть ли /usr/bin/python
+Если необходимо, то следует выполнить sudo apt install python
+Загрузка 
 ## 3.1. Устанавливаем утилиты для компиляции WebRTC
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $HOME/depot_tools
+echo "export PATH=$HOME/depot_tools:\$PATH" | sudo tee /etc/profile.d/depot_tools.sh
+
 ## 3.2. Конфигурация для branch-heads/59
 ```bash
-GYP_DEFINES="target_arch=arm" fetch --no-history webrtc
-echo "target_os = ['unix']" >> .gclient
+mkdir webrtc && cd webrtc
+fetch webrtc
 cd src
+git checkout branch-heads/m79
+gclient sync
 
 # строка для конфигурирования последней версии WebRTC
-gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" rtc_use_x11=false use_x11=false rtc_build_examples=false is_component_ffmpeg=true libyuv_include_tests=false'
+gn gen out/Release --args='target_os="unix" target_cpu="arm" is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" rtc_use_x11=false use_x11=false rtc_build_examples=false is_component_ffmpeg=true libyuv_include_tests=false'
 ```
 
 ## 3.3. Конфигурация для branch-heads/59
@@ -59,21 +67,21 @@ gn gen out/arm --args='is_debug=false symbol_level=2 is_component_build=false is
 gn gen out/arm --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" is_component_ffmpeg=true libyuv_include_tests=false'
 ```
 
-## 2.2. Готовимся к компиляции
+## 3.4. Готовимся к компиляции
 *скорректируем имена используемых компиляторов/утилит*
 ```bash
 find out/Release_arm -type f -name '*.ninja' -exec sed -i 's/arm-linux-gnueabihf-//g' {} \;
 find out/Release_arm -type f -name '*.ninja' -exec sed -i 's/\/arm-linux-gnueabihf//g' {} \;
 ```
 
-## 2.4. Собственно компиляция
+# 4. Собственно компиляция
 ```bash
 sfossdk
 #? export PATH=$PATH:/home/dav/projects/depot_tools
 sb2 -m sdk-build ninja -C out/Release
 ```
 
-## 2.5. Возможные ошибки при компиляции:
+## 4.1. Возможные ошибки при компиляции:
 ### error:
 ```
 [220/2868] CXX obj/buildtools/third_party/libc++abi/libc++abi/cxa_personality.o
@@ -261,23 +269,23 @@ compilation terminated.
 #### fix:
 ???
 
-# 3. Собираем SDK
+# 5. Собираем SDK
 ```bash
 mkdir -p ../libwebrtc/include
 mkdir -p ../libwebrtc/lib
 ```
 
-## 3.1. Копируем заголовочные файлы
+## 5.1. Копируем заголовочные файлы
 ```bash
 find . -name '*.h' -exec cp --parents {} ../libwebrtc/include \;
 ```
 
-## 3.2. Удаляем каталоги с не нужными заголовочными фалами
+## 5.2. Удаляем каталоги с не нужными заголовочными фалами
 ```bash
 rm -Rf ../libwebrtc/include/build ../libwebrtc/include/buildtools ../libwebrtc/include/out ../libwebrtc/include/test ../libwebrtc/include/testing ../libwebrtc/include/tools_webrtc ../libwebrtc/include/examples
 ```
 
-## 3.3. Копируем файлы библиотек
+## 5.3. Копируем файлы библиотек
 ```bash
 cp out/Release/obj/libwebrtc.a ../libwebrtc/lib
 ```
