@@ -2,6 +2,7 @@
 ----------------------------------------------------------------------------------------------------
 
 # 1. Устанавливаем SDK и утилиты для кросскомпиляции (только версия для armv7hl)
+## 1.1. Устанавливаем SDK [https://sailfishos.org/wiki/Platform_SDK_Installation]
 ```bash
 export PLATFORM_SDK_ROOT=/srv/mer
 curl -k -O http://releases.sailfishos.org/sdk/installers/latest/Jolla-latest-SailfishOS_Platform_SDK_Chroot-i486.tar.bz2 ;
@@ -13,9 +14,23 @@ echo 'PS1="PlatformSDK $PS1"' > ~/.mersdk.profile ;
 echo '[ -d /etc/bash_completion.d ] && for i in /etc/bash_completion.d/*;do . $i;done'  >> ~/.mersdk.profile ;
 ```
 
-# 2. Устанавливаем утилиты внутри среды кросскомпиляции
+## 1.2. Устанавливаем утилиты для кросскомпиляции (только версия для armv7hl) [https://sailfishos.org/wiki/Platform_SDK_Target_Installation]
+Перейти в SDK shell (выполнить sfossdk), а затем выполнить следующие команды:
 ```bash
-sfossdk
+sdk-assistant create SailfishOS-latest http://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Tooling-i486.tar.7z
+sdk-assistant create SailfishOS-latest-armv7hl http://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Target-armv7hl.tar.7z
+```
+## 1.3. Можно установить еще и утилиты для кросскомпиляции в i486
+```bash
+sdk-assistant create SailfishOS-latest-i486 http://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Target-i486.tar.7z
+```
+*если установлено несколько версий утилит кросскомпиляции, то следует указывать, какой набор будет использован при запуске sb2*
+*например, sb2 -t SailfishOS-latest-armv7hl -m sdk-install zypper in ...*
+
+
+# 2. Устанавливаем утилиты внутри среды кросскомпиляции
+Перейти в SDK shell (выполнить sfossdk), а затем выполнить следующие команды:
+```bash
 sb2 -m sdk-install -R zypper in git alsa-lib alsa-lib-devel pulseaudio pulseaudio-devel openssl openssl-devel libjpeg-turbo libjpeg-turbo-devel
 ```
 
@@ -28,22 +43,20 @@ echo "target_os = ['unix']" >> .gclient
 cd src
 
 # строка для конфигурирования последней версии WebRTC
-gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" rtc_use_x11=false use_x11=false rtc_build_examples=false'
+gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" rtc_use_x11=false use_x11=false rtc_build_examples=false is_component_ffmpeg=true libyuv_include_tests=false'
 ```
 
-## 2.2. Настраиваем версию WebRTC: branch-heads/59 (требуется для компиляции qwebrtc [https://github.com/tplgy/qwebrtc])
-*на хосте потребуется наличие gtk+-2.0 (sudo apt install gtk+-2.0)*
+## 2.1.1 Конфигурация для branch-heads/59
 ```bash
-GYP_DEFINES="target_arch=arm" fetch --nohooks webrtc
-echo "target_os = ['unix']" >> .gclient
-cd src
-git checkout branch-heads/59
-gclient sync --shallow
-
-# строка для конфигурирования версии WebRTC: branch-heads/59
-gn gen out/Release --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_custom_libcxx=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_enable_libevent=false rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm"'
+gn gen out/arm --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" is_component_ffmpeg=true libyuv_include_tests=false'
 ```
-## 2.3. Готовимся к компиляции
+
+### PlanB
+```bash
+gn gen out/arm --args='is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" target_cpu="arm" is_component_ffmpeg=true libyuv_include_tests=false'
+```
+
+## 2.2. Готовимся к компиляции
 *скорректируем имена используемых компиляторов/утилит*
 ```bash
 find out/Release -type f -name '*.ninja' -exec sed -i 's/arm-linux-gnueabihf-//g' {} \;
@@ -53,7 +66,7 @@ find out/Release -type f -name '*.ninja' -exec sed -i 's/\/arm-linux-gnueabihf//
 ## 2.4. Собственно компиляция
 ```bash
 sfossdk
-export PATH=$PATH:/home/dav/projects/depot_tools
+#? export PATH=$PATH:/home/dav/projects/depot_tools
 sb2 -m sdk-build ninja -C out/Release
 ```
 
