@@ -1,6 +1,13 @@
 !!! ВНИМАНИЕ !!! В процессе подготовки и установки исходников WebRTC потребуется скачать более 15Гб.
 ----------------------------------------------------------------------------------------------------
 
+# 0. Локальные пакеты
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install git python libglib2.0-dev
+```
+
 # 1. Устанавливаем SDK и утилиты для кросскомпиляции (только версия для armv7hl)
 ## 1.1. Устанавливаем SDK [https://sailfishos.org/wiki/Platform_SDK_Installation]
 ```bash
@@ -31,21 +38,18 @@ sdk-assistant create SailfishOS-latest-i486 http://releases.sailfishos.org/sdk/t
 # 2. Устанавливаем утилиты внутри среды кросскомпиляции
 Перейти в SDK shell (выполнить sfossdk), а затем выполнить следующие команды:
 ```bash
-sb2 -m sdk-install -R zypper in git alsa-lib-devel pulseaudio-devel openssl-devel libjpeg-turbo-devel ninja
+sb2 -m sdk-install -R zypper in git ninja python alsa-lib-devel pulseaudio-devel openssl-devel libjpeg-turbo-devel
 #sb2 -m sdk-install -R zypper in git alsa-lib pulseaudio openssl libjpeg-turbo
 ```
 
 *далее следует выбрать, какая версия WebRTC будет собираться (2.1 или 2.2). после выбора и настройки пеерходим к п. 2.3*
 
 # 3. Настраиваем поледнюю версию WebRTC
-ВАЖНО: нужно проверить, есть ли /usr/bin/python
-Если необходимо, то следует выполнить sudo apt install python
-Загрузка 
 ## 3.1. Устанавливаем утилиты для компиляции WebRTC
 git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $HOME/depot_tools
 echo "export PATH=$HOME/depot_tools:\$PATH" | sudo tee /etc/profile.d/depot_tools.sh
 
-## 3.2. Конфигурация для branch-heads/59
+## 3.2. Конфигурация для branch-heads/m79
 ```bash
 mkdir webrtc && cd webrtc
 fetch webrtc
@@ -54,8 +58,15 @@ git checkout branch-heads/m79
 gclient sync
 
 # строка для конфигурирования последней версии WebRTC
-gn gen out/Release --args='target_os="unix" target_cpu="arm" is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" rtc_use_x11=false use_x11=false rtc_build_examples=false is_component_ffmpeg=true libyuv_include_tests=false'
+gn gen out/Release --args='target_cpu="arm" is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=false rtc_ssl_root="/usr/include" rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" rtc_use_x11=false use_x11=false rtc_build_examples=false is_component_ffmpeg=true libyuv_include_tests=false'
 ```
+
+latest try: with ssl
+```bash
+gn gen out/Release --args='target_cpu="arm" is_debug=false symbol_level=2 is_component_build=false is_clang=false linux_use_bundled_binutils=false treat_warnings_as_errors=false use_debug_fission=false use_gold=false use_cxx11=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_sysroot=false proprietary_codecs=true rtc_build_json=true rtc_build_libevent=true rtc_build_libsrtp=true rtc_build_libvpx=true rtc_build_opus=true rtc_build_ssl=true rtc_enable_libevent=true rtc_enable_protobuf=false rtc_include_opus=true rtc_include_ilbc=true rtc_include_tests=false rtc_libvpx_build_vp9=true rtc_use_h264=true rtc_use_gtk=false use_system_libjpeg=true ffmpeg_branding="Chrome" rtc_use_x11=false rtc_build_examples=false is_component_ffmpeg=true libyuv_include_tests=false'
+```
+
+
 
 ## 3.3. Конфигурация для branch-heads/59
 ```bash
