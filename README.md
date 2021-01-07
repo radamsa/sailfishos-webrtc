@@ -12,7 +12,7 @@ sudo apt install git python libglib2.0-dev
 ## 1.1. Устанавливаем SDK [https://sailfishos.org/wiki/Platform_SDK_Installation]
 ```bash
 export PLATFORM_SDK_ROOT=/srv/mer
-curl -k -O http://releases.sailfishos.org/sdk/installers/latest/Jolla-latest-SailfishOS_Platform_SDK_Chroot-i486.tar.bz2 ;
+curl -k -O https://releases.sailfishos.org/sdk/installers/latest/Jolla-latest-SailfishOS_Platform_SDK_Chroot-i486.tar.bz2 ;
 sudo mkdir -p $PLATFORM_SDK_ROOT/sdks/sfossdk ;
 sudo tar --numeric-owner -p -xjf Jolla-latest-SailfishOS_Platform_SDK_Chroot-i486.tar.bz2 -C $PLATFORM_SDK_ROOT/sdks/sfossdk  ;
 echo "export PLATFORM_SDK_ROOT=$PLATFORM_SDK_ROOT" >> ~/.bashrc
@@ -24,12 +24,12 @@ echo '[ -d /etc/bash_completion.d ] && for i in /etc/bash_completion.d/*;do . $i
 ## 1.2. Устанавливаем утилиты для кросскомпиляции (только версия для armv7hl) [https://sailfishos.org/wiki/Platform_SDK_Target_Installation]
 Перейти в SDK shell (выполнить sfossdk), а затем выполнить следующие команды:
 ```bash
-sdk-assistant create SailfishOS-latest http://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Tooling-i486.tar.7z
-sdk-assistant create SailfishOS-latest-armv7hl http://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Target-armv7hl.tar.7z
+sdk-assistant create SailfishOS-latest https://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Tooling-i486.tar.7z
+sdk-assistant create SailfishOS-latest-armv7hl https://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Target-armv7hl.tar.7z
 ```
 ## 1.3. Можно установить еще и утилиты для кросскомпиляции в i486
 ```bash
-sdk-assistant create SailfishOS-latest-i486 http://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Target-i486.tar.7z
+sdk-assistant create SailfishOS-latest-i486 https://releases.sailfishos.org/sdk/targets/Sailfish_OS-latest-Sailfish_SDK_Target-i486.tar.7z
 ```
 *если установлено несколько версий утилит кросскомпиляции, то следует указывать, какой набор будет использован при запуске sb2*
 *например, sb2 -t SailfishOS-latest-armv7hl -m sdk-install zypper in ...*
